@@ -1,0 +1,1286 @@
+---
+title: "dplyr"
+author: "Mohammad Wasiq"
+date: "10/12/2021"
+output: html_document
+---
+
+# The Tidyverse
+The *tidyverse* is a collection of R Packages specifically designed for Data Science. The following tutorials explain how to use various functions in these packages.
+
+## dplyr 
+A package designed for **manipulating data.**
+
+### Arrange Rows in R
+<br>**arrange()**
+<br>1. **Arrange by One Column**
+<br>2. **Arrange by Multiple Columns**
+<br>3. **Arrange Rows in a Custom order**
+
+```{r a1}
+library(dplyr)
+#create data frame
+df <- data.frame(player = c('A', 'B', 'C', 'D', 'E', 'F', 'G'),
+                 points = c(12, 14, 14, 15, 20, 18, 29),
+                 assists = c(3, 5, 7, 8, 14, NA, 9))
+
+#view data frame 
+df
+
+# 1: Arrange by One Column
+df %>% arrange(points)
+
+# To sort in descending order, we can use the desc() function:
+df %>% arrange(desc(points))
+
+df %>% arrange(assists)
+
+# 2: Arrange by Multiple Columns
+# sort by points, then assists 
+df %>% arrange(points , assists)
+
+
+# 3: Arrange Rows in a Custom order
+#sort by player with custom order
+df %>% arrange(factor(player, levels = c('D', 'C', 'A', 'B', 'E', 'F', 'G')))
+```
+
+### Remove Rows
+1. Remove any row with NA’s
+<br>**df %>%
+<br>  na.omit()**
+2. Remove any row with NA’s in specific column
+<br>**df %>%
+<br>  filter(!is.na(column_name))**
+3. Remove duplicates
+<br>**df %>%
+<br>  distinct()**
+4. Remove rows by index position
+<br>**df %>%
+<br>  filter(!row_number() %in% c(1, 2, 4))**
+5. Remove rows based on condition
+<br>**df %>%
+<br>  filter(column1=='A' | column2 > 8)**
+
+```{r remove1}
+#create data frame
+df <- data.frame(team=c('A', 'A', 'B', 'B', 'C', 'C'),
+                 points=c(4, NA, 7, 5, 9, 9),
+                 assists=c(1, 3, 5, NA, 2, 2))
+
+#view data frame
+df
+
+#1: Remove Any Row with NA’s
+df %>%
+na.omit()
+
+# 2: Remove Any Row with NA’s in Specific Columns
+# remove any row with NA in 'points' column:
+df %>%
+filter(!is.na(points))
+
+# 3: Remove Duplicate Rows
+df %>%
+distinct()
+
+# 4: Remove Rows by Index Position
+# Remove rows 1,2 and 4
+df %>%
+filter(!row_number() %in% c(1,2,4))
+
+# 5: Remove Rows Based on Condition
+#only keep rows where team is equal to 'A' or points is greater than 8
+df %>%
+filter(team=='A' | points > 8)
+```
+
+### Remove Columns
+<br>**select()**
+<br>1. **Remove Columns by Name**
+<br>2. **Remove Columns in List**
+<br>3. **Remove Columns in Range**
+<br>4. **Remove Columns that Contain a Phrase**
+<br>5. **Remove Columns that Start with Certain Letters**
+<br>6. **Remove Columns that End with Certain Letters**
+<br>7. **Remove Columns that End with Certain Letters**
+
+```{r select1}
+#create data frame
+df <- data.frame(player = c('a', 'b', 'c', 'd', 'e'),
+                 position = c('G', 'F', 'F', 'G', 'G'),
+                 points = c(12, 15, 19, 22, 32),
+                 rebounds = c(5, 7, 7, 12, 11))
+
+#view data frame
+df
+
+# 1: Remove Columns by Name
+#remove column named 'points'
+df %>% select(-points)
+
+# 2: Remove Columns in List
+#remove columns named 'points' or 'rebounds'
+df %>% select(-one_of('points' , 'rebounds'))
+
+# 3: Remove Columns in Range
+#remove columns in range from 'position' to 'rebounds'
+df %>% select(-(position : rebounds))
+
+# 4: Remove Columns that Contain a Phrase
+#remove columns that contain the word 'points'
+df %>% select(-contains('points'))
+
+#  5: Remove Columns that Start with Certain Letters
+#remove columns that start with 'po'
+df %>% select(-starts_with('po'))
+
+# 6: Remove Columns that End with Certain Letters
+#remove columns that end with 's'
+df %>% select(-ends_with('s'))
+
+# 7: Remove Columns by Position
+#remove columns in position 1 and 4
+df %>% select(-1 , -4)
+```
+
+### Add Columns to Data Frame in R 
+1. Add Column at End of Data Frame
+<br>**df %>%
+<br>  mutate(new_col=c(1, 3, 3, 5, 4))**
+2. Add Column Before Specific Column
+<br>**df %>%
+<br>mutate(new_col=c(1, 3, 3, 5, 4),
+<br>        .before=col_name)**
+3. Add Column After Specific Column
+<br>**df %>%
+<br>mutate(new_col=c(1, 3, 3, 5, 4),
+<br>        .after=col_name)**
+4. Add Column Based on Other Columns
+<br>df %>%
+<br>  mutate(new_col= if_else(.$col_name > 10, 'A', 'B'))
+
+```{r add1}
+#create data frame
+df <- data.frame(team=c('A', 'A', 'A', 'A', 'B', 'B', 'B', 'B'),
+                 points=c(12, 14, 19, 24, 24, 22, 30, 9),
+                 assists=c(4, 6, 6, 8, 3, 7, 8, 11))
+
+#view data frame
+df
+
+# 1: Add Column at End of Data Frame
+#add 'blocks' column at end of data frame
+df <- df %>%
+        mutate(blocks=c(1, 3, 3, 2, 4, 3, 6, 2))
+
+#view data frame
+df
+
+# add an empty column by simply assigning NA to every value in the new column
+df = df %>% 
+mutate(blocks=NA)
+
+# View Data Frame
+df
+
+# 2: Add Column Before Specific Column
+#add 'blocks' column before 'points' column
+df <- df %>%
+        mutate(blocks=c(1, 3, 3, 2, 4, 3, 6, 2),
+               .before=points)
+#view data frame
+df
+
+# 3. Add Column After Specific Column
+#add 'blocks' column after 'points' column
+df <- df %>%
+        mutate(blocks=c(1, 3, 3, 2, 4, 3, 6, 2),
+              .after=points)
+
+#view data frame
+df
+
+# 4: Add Column Based on Other Columns
+#add 'status' column whose values depend on value in 'points' column
+df <- df %>%
+        mutate(status= if_else(.$points > 20, 'Good', 'Bad'))
+
+#view data frame
+df
+```
+
+### Count Observations by Group 
+<br>**count()**
+<br>1. **Count by One Variable**
+<br>2. **Count by Multiple Variables**
+<br>3. **Weighted Count**
+
+```{r count1}
+#create data frame
+df <- data.frame(team = c('A', 'A', 'A', 'B', 'B', 'B', 'B', 'B', 'C', 'C', 'C', 'C'),
+                 position = c('G', 'G', 'F', 'G', 'F', 'F', 'F', 'G', 'G', 'F', 'F', 'F'),
+                 points = c(4, 13, 7, 8, 15, 15, 17, 9, 21, 22, 25, 31))
+
+#view data frame
+df
+
+# 1 Count by One Variable
+#count total observations by variable 'team'
+df %>% count(team)
+
+# we can also sort the counts if we’d like:
+#count total observations by variable 'team'
+df %>% count(team, sort=TRUE)
+
+# 2. Count by Multiple Variables
+#count total observations by 'team' and 'position'
+df %>% count(team, position)
+
+#  3: Weighted Count
+df %>% count(team, wt=points)
+```
+
+
+### Count Distinct Values
+<br>**n_distinct()**
+<br> 1. **n_distinct(df$column_name)** : Count Distinct Values in One Column
+<br> 2. **sapply(df, function(x) n_distinct(x))** : Count Distinct Values in All Columns
+<br> 3. **df %>%**
+<br>  **group_by(grouping_column) %>%**
+<br>  **summarize(count_distinct = n_distinct(values_column))** : Count Distinct Values by Group
+
+```{r ndistinct1}
+#create data frame
+df <- data.frame(team=c('A', 'A', 'A', 'A', 'B', 'B', 'B', 'B'),
+                 points=c(6, 6, 8, 10, 9, 9, 12, 12),
+                 assists=c(3, 6, 4, 2, 4, 5, 5, 9))
+
+#view data frame
+df
+
+# 1: Count Distinct Values in One Column
+
+#count distinct values in 'team' column
+n_distinct(df$team)
+
+# 2: Count Distinct Values in All Columns
+
+#count distinct values in every column
+sapply(df, function(x) n_distinct(x))
+
+# 3 Count Distinct Values by Group
+
+# count distinct 'points' values by 'team'
+df %>%
+  group_by(team) %>%
+  summarise(distinct_points = n_distinct(points))
+```
+
+
+### Create a Crosstab
+<br>*library(dplyr)*
+<br>*library(tidyr)*
+<br>**df %>%**
+<br>  **group_by(var1, var2) %>%**
+<br>  **tally() %>%**
+<br>  **spread(var1, n)**
+
+```{r ct1}
+#create data frame
+df <- data.frame(team=c('A', 'A', 'A', 'A', 'B', 'B', 'B', 'B'),
+                 position=c('G', 'G', 'F', 'C', 'G', 'F', 'F', 'C'),
+                 points=c(7, 7, 8, 11, 13, 15, 19, 13))
+
+#view data frame
+df
+
+# create a crosstab for the ‘team’ and ‘position’ variables:
+
+library(dplyr)
+library(tidyr)
+
+#produce crosstab 
+df %>%
+  group_by(team, position) %>%
+  tally() %>%
+  spread(team, n)
+
+# switch the rows and columns of the crosstab by switching the variable used in the spread() function:
+
+#produce crosstab with 'position' along columns
+df%>%
+  group_by(team, position) %>%
+  tally() %>%
+  spread(position, n)
+```
+
+
+### Filter Rows
+<br>**filter()**
+
+<br>1. **Filter Rows Equal to Some Value**
+<br>2. **Filter Rows Using ‘And’ (&)**
+<br>3. **Filter Rows Using ‘Or’ (|)**
+<br>4. **Filter Rows with Values in a List**
+<br>5. **Filter Rows Using Less Than or Greater Than**
+
+```{r filter1}
+#view first six rows of starwars dataset
+head(starwars)
+dim(starwars)
+
+# 1. Filter Rows Equal to Some Value
+# filter the row eqaul to Droid
+starwars %>% filter(species == 'Droid')
+
+# 2. Filter Rows Using ‘And’ (&)
+#  filter for rows where the species is Droid and the eye color is red:
+starwars %>% filter(species == 'Droid' & eye_color == 'red')
+
+# 3. Filter Rows Using ‘Or’
+# filter for rows where the species is Droid or the eye color is red:
+starwars %>% filter(species == 'Droid' | eye_color == 'red')
+
+# 4. Filter Rows with Values in a List
+# filter for rows where the eye color is in a list of colors:
+# colors are blue, yellow, red
+starwars %>% filter(eye_color %in% c('blue', 'yellow', 'red'))
+
+# 5. Filter Rows Using Less Than or Greater Than
+# filter rows using less than or greater than operations on numeric variables
+#find rows where height is greater than 250
+starwars %>% filter(height > 250)
+
+#find rows where height is between 200 and 220
+starwars %>% filter(height > 200 & height < 220)
+
+#find rows where height is above the average height
+starwars %>% filter(height > mean(height, na.rm = TRUE))
+```
+
+
+### Filter by Multiple Conditions
+<br>*1. Filter by Multiple Conditions Using OR (|)*
+<br>**library(dplyr)**
+<br>**df %>%**
+<br>**filter(col1 == 'A' | col2 > 90)**
+<br>*2. Filter by Multiple Conditions Using AND (&)*
+<br>**library(dplyr)**
+<br>**df %>%**
+<br>**filter(col1 == 'A' & col2 > 90)**
+
+```{r mc1}
+#create data frame
+df <- data.frame(team=c('A', 'A', 'B', 'B', 'C'),
+                 points=c(99, 90, 86, 88, 95),
+                 assists=c(33, 28, 31, 39, 34),
+                 rebounds=c(30, 28, 24, 24, 28))
+
+#view data frame
+df
+
+# 1. Filter by Multiple Conditions Using OR
+# filter for rows where team is equal to 'A' or points is greater than 90
+df %>% 
+filter(team == 'A' | points> 90)
+
+#filter for rows where team is equal to 'A' or 'C' or points is less than 89
+df %>%
+  filter(team == 'A' | team == 'C' | points > 90)
+
+# 2. Filter by Multiple Conditions Using AND
+#filter for rows where team is equal to 'A' or 'C' or points is less than 89
+df %>% filter(team == 'A' & points > 90)
+
+#filter where team is equal to 'A' and points > 89 and assists < 30
+df %>% filter(team == 'A' & points>89 & assists<30)
+```
+
+
+### Use a “not in” Filter
+<br>**df %>%**
+<br>  **filter(!col_name %in% c('value1', 'value2', 'value3', ...))**
+  
+<br>1. **Filter for Rows that Do Not Contain Value in One Column**
+<br>2. **Filter for Rows that Do Not Contain Value in Multiple Columns**
+
+```{r not1}
+#create data frame
+df <- data.frame(team=c('A', 'A', 'B', 'B', 'C', 'C', 'D', 'D'),
+                 position=c('G', 'G', 'F', 'G', 'F', 'C', 'C', 'C'),
+                 points=c(12, 14, 19, 24, 36, 41, 18, 29))
+
+#view data frame
+df
+
+#filter for rows where team name is not 'A' or 'B'
+df %>%
+  filter(!team %in% c('A', 'B'))
+
+# 2: Filter for Rows that Do Not Contain Value in Multiple Columns
+# #filter for rows where team name is not 'A' and position is not 'C'
+df %>%
+  filter(!team %in% c('A') & !position %in% c('C'))
+```
+
+
+### Remove Rows with NA Values
+<br>1. *Remove rows with NA value in any column*
+<br>**df %>%**
+<br>  **na.omit()**
+<br>2. *Remove Rows with NA Values in Certain Columns*
+<br>**df %>%**
+<br>  **filter_at(vars(col1, col2), all_vars(!is.na(.)))**
+<br>3. *Remove Rows with NA Values in One Specific Column*
+<br>**df %>%**
+<br>  **filter(!is.na(col1))**
+
+```{r rna1}
+#create data frame with some missing values
+df <- data.frame(team=c('A', 'A', 'B', 'B', 'C'),
+                 points=c(99, 90, 86, 88, NA),
+                 assists=c(33, NA, 31, 39, 34),
+                 rebounds=c(NA, 28, 24, 24, 28))
+
+#view data frame
+df
+
+# 1. Remove rows with NA value in any column
+df %>%
+  na.omit()
+
+# #remove rows with NA value in any column
+df %>%
+  filter_at(vars(points, assists), all_vars(!is.na(.)))
+
+# 3: Remove Rows with NA Values in One Specific Column
+#remove rows with NA value in 'points' column
+df %>%
+  filter(!is.na(points))
+```
+
+### Recode Values
+<br>**recode()**
+<br>1. **Recode a Single Column in a Dataframe**
+<br>2.**Recode a Single Column in a Dataframe and Provide NA Values**
+<br>3. **Recode Multiple Columns in a Dataframe**
+
+```{r rval1}
+#create dataframe 
+df <- data.frame(player = c('A', 'B', 'C', 'D'),
+                 points = c(24, 29, 13, 15),
+                 result = c('Win', 'Loss', 'Win', 'Loss'))
+
+#view dataframe 
+df
+
+#1. change 'Win' and 'Loss' to '1' and '0'
+df %>%
+  mutate(result=recode(result,'Win'='1', 'Loss'='0'))
+
+# 2.Recode a Single Column in a Dataframe and Provide NA Values
+#change 'Win' to '1' and give all other values a value of NA
+df %>% 
+  mutate(result=recode(result, 'Win'='1', .default=NA_character_))
+
+# 3: Recode Multiple Columns in a Dataframe
+#recode 'player' and 'result' columns
+df %>%
+  mutate(player = recode(player, 'A' = 'Z'),
+         result = recode(result, 'Win'='1' , 'Loss' = '0'))
+```
+
+
+### Reorder Columns
+<br>**select()**
+<br>1. **Move a Column to the First Position**
+<br>2. **Move a Column to the Last Position**
+<br>3. **Reorder Multiple Columns**
+<br>4. **Reorder Columns Alphabetically**
+<br>5. **Reverse Column Order**
+
+```{r reorder1}
+#create data frame
+df <- data.frame(player = c('a', 'b', 'c', 'd', 'e'),
+                 position = c('G', 'F', 'F', 'G', 'G'),
+                 points = c(12, 15, 19, 22, 32),
+                 rebounds = c(5, 7, 7, 12, 11))
+
+#view data frame
+df
+
+# 1: Move a Column to the First Position
+#move column 'points' to first position
+df %>% select(points, everything())
+
+# 2: Move a Column to the Last Position
+#move column 'points' to last position
+df %>% select(-points, points)
+
+# 3. Reorder Multiple Columns
+#change all column names to uppercase
+df %>% select(rebounds, position, points, player)
+
+# 4. Reorder Columns Alphabetically
+#order columns alphabetically
+df %>% select(order(colnames(.)))
+
+# 5. Reverse Column Order
+#reverse column order
+df %>% select(rebounds : player , everything())
+```
+
+
+### Rename Column by Index Position 
+<br>1. *Rename One Column by Index*
+<br>**df %>%**
+<br>   **rename(new_name1 = 1)**
+<br>2. *Rename Multiple Columns by Index*
+<br>**df %>%**
+<br>  **rename(new_name1 = 1,**
+<br>        **new_name2 = 2,**
+<br>        **new_name3 = 3)**
+
+
+```{r renmae1}
+#create data frame
+df <- data.frame(team=c('A', 'A', 'A', 'A', 'B', 'B', 'B', 'B'),
+                 points=c(12, 14, 19, 24, 24, 22, 30, 9),
+                 assists=c(4, 6, 6, 8, 3, 7, 8, 11))
+
+df
+#1. rename column in index position 1
+df <- df %>%
+        rename(team_new = 1)
+
+#view updated data frame
+df
+
+# 2. Rename Multiple Columns by Index
+#rename column in index position 1
+df<- df %>%
+       rename(points_new = 2,
+              assists_new = 3)
+
+#view updated data frame
+df
+```
+
+
+### Group & Summarize Data
+<br>**data %>%**
+<br>  **group_by(col_name) %>%**
+<br>  **summarize(summary_name = summary_function)**
+<br>1. *Find Mean & Median by Group*
+<br>2. *Find Measures of Spread by Group*
+<br>3. *Find Count by Group*
+<br>4. *Find Percentile by Group*
+
+```{r grp1}
+#obtain rows and columns of mtcars
+dim(mtcars)
+#view first six rows of mtcars
+head(mtcars)
+
+# 1: Find Mean & Median by Group
+#find mean mpg by cylinder
+mtcars %>%
+  group_by(cyl) %>%
+  summarise(mean_mpg = mean(mpg, na.rm = TRUE))
+
+# find the median mpg by cyl
+mtcars %>%
+  group_by(cyl) %>%
+  summarise(median_mpg = median(mpg, na.rm = TRUE))
+
+# 2. Find Measures of Spread by Group
+#find sd, IQR, and mad by cylinder
+mtcars %>%
+  group_by(cyl) %>%
+  summarize(sd_mpg = sd(mpg, na.rm = TRUE),
+            iqr_mpg = IQR(mpg, na.rm = TRUE),
+            mad_mpg = mad(mpg, na.rm = TRUE))
+
+# 3: Find Count by Group
+#find row count and unique row count by cylinder
+mtcars %>% 
+  group_by(cyl) %>%
+  summarise(count_mpg = n(),
+            u_count_mpg = n_distinct(mpg))
+
+# 4: Find Percentile by Group
+#find 90th percentile of mpg for each cylinder group
+mtcars %>%
+  group_by(cyl) %>%
+  summarize(quant90 = quantile(mpg, probs = 0.9))
+```
+
+
+### Maximum Value by Group
+<br>1. **Maximum Value by Group**
+<br>2. **Return Rows that Contains Max Value by Group**
+<br>3. **Return a Single Row that Contains Max Value by Group**
+
+```{r max1}
+#create data frame
+df <- data.frame(team = c('A', 'A', 'A', 'B', 'B', 'B', 'B'),
+                 position = c('G', 'F', 'F', 'G', 'G', 'G', 'F'),
+                 points = c(12, 15, 19, 22, 34, 34, 39))
+
+#view data frame
+df
+
+# 1. Find Max Value by Group
+#find max value by team and position
+df %>%
+  group_by(team, position) %>%
+  summarise(max = max(points, na.rm=TRUE))
+
+# 2: Return Rows that Contains Max Value by Group
+#find rows that contain max points by team and position
+df %>%
+  group_by(team, position) %>%
+  filter(points == max(points, na.rm=TRUE))
+
+# 3: Return a Single Row that Contains Max Value by Group
+#find rows that contain max points by team and position
+df %>%
+  group_by(team, position) %>%
+  slice(which.max(points))
+```
+
+
+### Replace NA with Zero
+<br>1.**df <- df %>% replace(is.na(.), 0)** : Replace all NA values with zero
+<br>2. **df %>% mutate(col1 = ifelse(is.na(col1), 0, col1))** : Replace NA values with zero in column named col1
+<br>3. *Replace NA values with zero in columns col1 and col2*
+<br>**df %>% mutate(col1 = ifelse(is.na(col1), 0, col1),**
+<br>              **col2 = ifelse(is.na(col2), 0, col2))**
+
+
+```{r rwz1}
+library(dplyr)
+#create data frame
+df <- data.frame(player=c('A', 'B', 'C', 'D', 'E'),
+                 pts=c(17, 12, NA, 9, 25),
+                 rebs=c(3, 3, NA, NA, 8),
+                 blocks=c(1, 1, 2, 4, NA))
+
+#view data frame
+df
+
+# 1: Replace All NA Values in All Columns
+df <- df %>% replace(is.na(.), 0)
+df
+
+# 2: Replace NA Values in a Specific Column
+#replace NA values with zero in rebs column only
+df<- df %>% mutate(rebs= ifelse(is.na(rebs), 0, rebs))
+df
+
+# 3: Replace NA Values in One of Several Columns
+#replace NA values with zero in rebs and pts columns
+df <- df %>% mutate(rebs = ifelse(is.na(rebs), 0, rebs),
+                    pts = ifelse(is.na(pts), 0, pts))
+
+df
+```
+
+
+### Join Multiple Data Frames
+<br>**left_join()**
+
+```{r join1}
+#create data frame
+df1 <- data.frame(a = c('a', 'b', 'c', 'd', 'e', 'f'),
+                  b = c(12, 14, 14, 18, 22, 23))
+
+df2 <- data.frame(a = c('a', 'a', 'a', 'b', 'b', 'b'),
+                  c = c(23, 24, 33, 34, 37, 41))
+
+df3 <- data.frame(a = c('d', 'e', 'f', 'g', 'h', 'i'),
+                  d = c(23, 24, 33, 34, 37, 41))
+
+# To join all three data frames together
+df1 %>%
+  left_join(df2 , by= 'a') %>%
+  left_join(df3 , by= 'a')
+
+#join the three data frames and save result as new data frame named all_data
+
+all_data <- df1 %>%
+  left_join(df2, by= 'a') %>%
+  left_join(df3, by= 'a')
+#view summary of resulting data frame 
+glimpse(all_data)  
+```
+
+
+### Anti_join to Find Unmatched Records
+<br>Return all rows in one data frame that do not have matching values in another data frame.
+<br>**anti_join()**
+<br>**anti_join(df1, df2, by='col_name')**
+<br>1. *Use anti_join() with One Column*
+<br>2. *Use anti_join() with Multiple Columns*
+
+```{r join2}
+#create data frames
+# 1. Use anti_join() with One Column
+df1 <- data.frame(team=c('A', 'B', 'C', 'D', 'E'),
+                  points=c(12, 14, 19, 24, 36))
+
+df2 <- data.frame(team=c('A', 'B', 'C', 'F', 'G'),
+                  points=c(12, 14, 19, 33, 17))
+#perform anti join using 'team' column
+anti_join(df1, df2, by= 'team')
+
+# 2. Use anti_join() with Multiple Columns
+
+#create data frames
+df1 <- data.frame(team=c('A', 'A', 'A', 'B', 'B', 'B'),
+                  position=c('G', 'G', 'F', 'G', 'F', 'C'),
+                  points=c(12, 14, 19, 24, 36, 41))
+
+df2 <- data.frame(team=c('A', 'A', 'A', 'B', 'B', 'B'),
+                  position=c('G', 'G', 'C', 'G', 'F', 'F'),
+                  points=c(12, 14, 19, 33, 17, 22))
+
+#perform anti join using 'team' and 'position' columns
+anti_join(df1, df2, by = c('team', 'position'))
+```
+
+
+### case_when()
+<br>Used to create new variables from existing variables.
+<br>**df %>%**
+<br>  **mutate(new_var = case_when(var1 < 15 ~ 'low',**
+<br>                             **var2 < 25 ~ 'med',**
+<br>                             **TRUE ~ 'high'))**
+
+<br>1. *Create New Variable from One Existing Variable*
+<br>2. *Create New Variable from Multiple Variables*
+
+```{r cw1}
+#create data frame
+df <- data.frame(player = c('AJ', 'Bob', 'Chad', 'Dan', 'Eric', 'Frank'),
+                 position = c('G', 'F', 'F', 'G', 'C', NA),
+                 points = c(12, 15, 19, 22, 32, NA),
+                 assists = c(5, 7, 7, 12, 11, NA))
+
+#view data frame
+df
+
+# 1: Create New Variable from One Existing Variable
+# create a new variable called quality whose values are derived from the points column
+# Here is exactly how the case_when() function created the values for the new column:
+# i. If the value in the points column is greater than 20, then the value in the quality column is “high”
+# ii. Else, if the value in the points column is greater than 15, then the value in the quality column is “med”
+# iii. Else, if the value in the points column is less than or equal to 15 (or a missing value like NA), then the value in the quality column is “low”
+# iv. Else, if the value in the points column is greater than 15, then the value in the quality column is “med”
+df %>%
+  mutate(quality= case_when(points > 20 ~ 'high',
+                            points > 15~ 'med',
+                            TRUE~ 'low'))
+
+# 2: Create New Variable from Multiple Variables
+# create a new variable called quality whose values are derived from both the points and assists column
+df %>%
+  mutate(quality = case_when(is.na(points) ~ 'missing',
+                             points > 15 & assists > 10 ~ 'great',
+                             points > 15 & assists > 5 ~ 'good',
+                             TRUE ~ 'average' ))
+```
+
+
+### Use bind_rows and bind_cols
+<br>To bind together two data frames by their rows:
+<br>**bind_rows(df1, df2, df3, ...)**
+
+To bind together two data frames by their columns:
+<br>**bind_cols(df1, df2, df3, ...)**
+
+```{r bind1}
+#create data frames
+df1 <- data.frame(team=c('A', 'A', 'B', 'B'),
+                  points=c(12, 14, 19, 24))
+
+
+df2 <- data.frame(team=c('A', 'B', 'C', 'C'),
+                  points=c(8, 17, 22, 25))
+
+df3 <- data.frame(team=c('A', 'B', 'C', 'C'),
+                  assists=c(4, 9, 12, 6))
+
+#row bind together data frames
+bind_rows(df1, df2, df3)
+
+# Column bind togrther data franes
+bind_cols(df1, df2, df3)
+```
+
+### Select Columns by Index
+<br>*Select columns in specific index positions*
+<br>**df %>%**
+<br>  **select(1, 4, 5)**
+<br>*Exclude columns in specific index positions*
+<br>**df %>%**
+<br>  **select(-c(1,2))**
+
+```{r scbi1}
+#create data frame
+df <- data.frame(team=c('A', 'B', 'C', 'D', 'E'),
+                 points=c(99, 90, 86, 88, 95),
+                 assists=c(33, 28, 31, 39, 34),
+                 rebounds=c(30, 28, 24, 24, 28),
+                 blocks=c(14, 19, 22, 18, 15))
+
+#view data frame
+df
+
+# 1: Select Columns in Specific Index Positions
+#select columns in position 1, 4, and 5
+df %>% 
+  select(1,4,5)
+
+#2: Select Columns in Range
+#select columns in position 2 through 4
+df %>%
+  select(2:4)
+
+# 3: Exclude Specific Columns
+#select all columns except those in position 1 and 2
+df %>%
+  select(-c(1, 2))
+```
+
+
+### Calculate Relative Frequencies
+<br>1. **Relative Frequency of One Variable**
+<br>2. **Relative Frequency of Multiple Variables**
+<br>3. **Display Relative Frequencies as Percentages**
+
+```{r rf1}
+#create data frame
+df <- data.frame(team = c('A', 'A', 'A', 'B', 'B', 'B', 'B'),
+                 position = c('G', 'F', 'F', 'G', 'G', 'G', 'F'),
+                 points = c(12, 15, 19, 22, 32, 34, 39))
+
+#view data frame
+df
+
+# 1: Relative Frequency of One Variable
+# To calculate the relative frequency of each team in the data frame
+df %>% 
+  group_by(team) %>% 
+  summarize(n= n()) %>%
+  mutate(rel_freq = n / sum(n))
+
+#  2: Relative Frequency of Multiple Variables
+# To calculate the relative frequency of positions by team:
+df %>% 
+  group_by(team, position) %>%
+  summarise(n= n()) %>%
+  mutate(freq= n / sum(n))
+
+# 3: Display Relative Frequencies as Percentages
+# To calculate the relative frequency of positions by team and how to display these relative frequencies as percentages
+df %>%
+  group_by(team, position) %>%
+  summarise(n= n()) %>%
+  mutate(freq = paste0(round(100 * n/sum(n), 0), '%'))
+```
+
+### Frequency Table by Group
+<br>**df %>%**
+<br>  **group_by(var1, var2) %>%**
+<br>  **summarize(Freq=n())**
+
+```{r ftbg1}
+#create data frame
+df <- data.frame(team=c('A', 'A', 'A', 'A', 'B', 'B', 'B', 'B'),
+                 position=c('G', 'G', 'G', 'F', 'G', 'F', 'F', 'C'))
+
+#view data frame
+df
+
+#  create a frequency table that shows the frequency of each position, grouped by team.
+df %>% 
+  group_by(team, position) %>%
+  summarise(Freq = n())
+```
+
+
+### Select the First Row by Group
+<br>**df %>%**
+<br>  **group_by(group_var) %>%**
+<br>  **arrange(values_var) %>%**
+<br>  **filter(row_number()==1)**
+
+```{r frg1}
+library(dplyr)
+#create dataset
+df <- data.frame(team=c('A', 'A', 'A', 'B', 'B', 'B', 'C', 'C', 'C', 'C'),
+                 points=c(4, 9, 7, 7, 6, 13, 8, 8, 4, 17))
+
+#view dataset
+df
+
+#  select the first row by group 
+df %>% 
+  group_by(team) %>%
+  arrange(points) %>%
+  filter(row_number()==1)
+
+# By default, arrange() sorts the values in ascending order but we can easily sort the values in descending order instead
+df %>% 
+  group_by(team) %>%
+  arrange(desc(points)) %>%
+  filter(row_number()==1)
+
+# select the 2nd row by group
+df %>%
+  group_by(team) %>%
+  arrange(desc(points)) %>%
+  filter(row_number()==2)
+
+# select the last row by group:
+
+df %>%
+  group_by(team) %>%
+  arrange(desc(points)) %>%
+  filter(row_number()==n())
+```
+
+
+### Rank Variables by Group
+
+<br>**df %>% arrange(group_var, numeric_var) %>%**
+<br>    **group_by(group_var) %>%**
+<br>    **mutate(rank = rank(numeric_var))**
+
+1. **Rank in Ascending Order**
+<br>2. **Rank in Descending Order**
+<br>3. **How to Handle Ties in Ranking**
+
+
+```{r rvbg1}
+#create data frame
+df <- data.frame(team = c('A', 'A', 'A', 'A', 'B', 'B', 'B', 'C', 'C', 'C'),
+                 points = c(12, 28, 19, 22, 32, 45, 22, 28, 13, 19),
+                 rebounds = c(5, 7, 7, 12, 11, 4, 10, 7, 8, 8))
+
+#view data frame
+df
+
+#  1: Rank in Ascending Order
+#  rank the points scored by players in ascending order, grouped by team
+#rank points scored, grouped by team
+df %>%
+  arrange(team, points) %>%
+  group_by(team) %>%
+  mutate(rank = rank(points))
+
+#  2: Rank in Descending Order
+#rank points scored in reverse, grouped by team
+df %>%
+  arrange(team, points) %>%
+  group_by(team) %>%
+  mutate(rank = rank(-points))
+```
+
+
+### Mutate to Create New Variables
+<br>1.**mutate()** – adds new variables to a data frame while preserving existing variables
+<br>2. **transmute()** – adds new variables to a data frame and drops existing variables
+<br>3. **mutate_all()** –  modifies all of the variables in a data frame at once
+<br>4. **mutate_at()** –  modifies specific variables by name
+<br>5. **mutate_if()** – modifies all variables that meet a certain condition
+
+
+#### 1. mutate()
+<br>The *mutate()* function adds new variables to a data frame while preserving any existing variables. The basic synax for mutate() is as follows:
+<br>**data <- mutate(new_variable = existing_variable/3)**
+<br>*data:* the new data frame to assign the new variables to
+<br>*new_variable:* the name of the new variable
+<br>*existing_variable:* the existing variable in the data frame that you wish to perform some operation on to create the new variable
+
+```{r mut1}
+#define data frame as the first six lines of the iris dataset
+data <- head(iris)
+
+#view data
+data
+
+#define new column root_sepal_width as the square root of the Sepal.Width variable
+data %>%
+  mutate(root_sepal_width = sqrt(Sepal.Width))
+
+```
+
+#### 2. transmute()
+<br>The *transmute()* function adds new variables to a data frame and drops existing variables
+
+```{r tm1}
+#define data frame as the first six lines of the iris dataset
+data <- head(iris)
+
+#view data
+data
+
+#define two new variables and remove all existing variables
+data %>%
+  transmute(root_sepal_width = sqrt(Sepal.Width),
+            root_petal_width = sqrt(Petal.Width))
+```
+
+
+#### 3. mutate_all()
+<br>The *mutate_all()* function modifies all of the variables in a data frame at once, allowing you to perform a specific function on all of the variables by using the *funs()* function. 
+
+```{r muteall1}
+#define new data frame as the first six rows of iris without the Species variable
+data2<- head(iris) %>%
+  select(-Species)
+
+data2
+
+#divide all variables in the data frame by 10
+data2 %>% mutate_all(funs(./10))
+
+# Note that additional variables can be added to the data frame by specifying a new name to be appended to the old variable name:
+data2 %>% mutate_all(funs(mod = ./10))
+```
+
+#### 4. mutate_at()
+<br>The *mutate_at()* function modifies specific variables by name.
+
+```{r muteat1}
+# The following code illustrates how to divide two specific variables by 10 using mutate_at():
+data2 %>%
+  mutate_at(c('Sepal.Length', 'Sepal.Width'), funs(mod = ./10))
+```
+
+#### 5. mutate_if()
+<br>The *mutate_if()* function modifies all variables that meet a certain condition. 
+
+```{r muteif1}
+# The following code illustrates how to use the mutate_if() function to convert any variables of type factor to type character:
+#find variable type of each variable in a data frame
+data <- head(iris)
+sapply(data, class)
+
+#convert any variable of type factor to type character
+new_data <- data %>% 
+  mutate_if(is.factor, as.character)
+sapply(new_data, class)
+
+# round any variables of type numeric to one decimal place:
+
+#define data as first six rows of iris dataset
+data <- head(iris)
+
+#view data
+data
+
+#round any variables of type numeric to one decimal place
+data %>% mutate_if(is.numeric, round, digits = 0)
+```
+
+
+### Create New Variables
+<br>Create a new variable in a data frame using the *mutate()* and *case_when()*.
+
+```{r cnw1}
+#create data frame
+df <- data.frame(player = c('a', 'b', 'c', 'd', 'e'),
+                 position = c('G', 'F', 'F', 'G', 'G'),
+                 points = c(12, 15, 19, 22, 32),
+                 rebounds = c(5, 7, 7, 12, 11))
+
+#view data frame
+df
+
+#  1: Create New Variable Based on One Existing Variable
+#define new variable 'scorer' using mutate() and case_when()
+df %>%
+  mutate(scorer = case_when(points < 15 ~ 'low',
+                           points < 25 ~ 'med',
+                           points < 35 ~ 'high'))
+
+# 2: Create New Variable Based on Several Existing Variables
+#define new variable 'type' using mutate() and case_when()
+df %>%
+  mutate(type = case_when(player == 'a' | player == 'b' ~ 'starter',
+                            player == 'c' | player == 'd' ~ 'backup',
+                            position == 'G' ~ 'reserve'))
+
+# create a new variable called ‘valueAdded’ based on the value in the points and rebounds columns
+#define new variable 'valueAdded' using mutate() and case_when()
+df %>%
+  mutate(valueAdded = case_when(points <= 15 & rebounds <=5 ~ 2,
+                                points <=15 & rebounds > 5 ~ 4,
+                                points < 25 & rebounds < 8 ~ 6,
+                                points < 25 & rebounds > 8 ~ 7,
+                                points >=25 ~ 9))
+
+```
+
+
+# tidyr  
+<br>A package designed for creating tidy data.
+
+## Spread Function
+<br>**spread(data, key value)**
+<br>where,  *data:* Name of the data frame
+<br<*key:* Column whose values will become variable names
+<br>*value:* Column where values will fill under new variables created from key
+<br>1. *Spread Values Across Two Columns*
+<br>2. *Spread Values Across More Than Two Columns*
+
+```{r spread1}
+library(tidyr)
+#create data frame
+df <- data.frame(player=rep(c('A', 'B'), each=4),
+                 year=rep(c(1, 1, 2, 2), times=2),
+                 stat=rep(c('points', 'assists'), times=4),
+                 amount=c(14, 6, 18, 7, 22, 9, 38, 4))
+
+#view data frame
+df
+
+# 1: Spread Values Across Two Columns
+# to turn the values in the stat column into their own columns
+#spread stat column across multiple columns
+spread(df, key=stat, value=amount)
+
+# 2: Spread Values Across More Than Two Columns
+#create data frame
+df2 <- data.frame(player=rep(c('A'), times=8),
+                 year=rep(c(1, 2), each=4),
+                 stat=rep(c('points', 'assists', 'steals', 'blocks'), times=2),
+                 amount=c(14, 6, 2, 1, 29, 9, 3, 4))
+
+#view data frame
+df2
+
+# turn the four unique values in the stat column into four new columns:
+#spread stat column across multiple columns
+spread(df2, key=stat, value=amount)
+```
+
+## Gather Function
+<br>The gather() function from the tidyr package can be used to “gather” a key-value pair across multiple columns.
+<br>**gather(data, key value, …)**
+<br>where, *data:* Name of the data frame
+<br>*key:* Name of the key column to create
+<br>*value:* Name of the value column to create
+<br>*… :* Specify which columns to gather from
+<br>1. *Gather Values From Two Columns*
+<br>2. *Gather Values From More Than Two Columns*
+
+```{r gather1}
+# 1: Gather Values From Two Columns
+#create data frame
+df <- data.frame(player=c('A', 'B', 'C', 'D'),
+                 year1=c(12, 15, 19, 19),
+                 year2=c(22, 29, 18, 12))
+
+#view data frame
+df
+
+# Create two new columns called “year” and “points” as follows:
+#gather data from columns 2 and 3
+gather(df, key="year", value="points", 2:3)
+
+# 2: Gather Values From More Than Two Columns
+#create data frame
+df2 <- data.frame(player=c('A', 'B', 'C', 'D'),
+                  year1=c(12, 15, 19, 19),
+                  year2=c(22, 29, 18, 12),
+                  year3=c(17, 17, 22, 25))
+
+#view data frame
+df2
+
+# “gather” the values from columns 2, 3, and 4 into two new columns called “year” and “points” as follows
+#gather data from columns 2, 3, and 4
+gather(df2, key="year", value="points", 2:4)
+```
+
+### Use Separate Function in R 
+<br>The separate() function from the tidyr package can be used to separate a data frame column into multiple columns.
+<br>**separate(data, col, into, sep)**
+<br>where, **data:** Name of the data frame
+<br>**col:** Name of the column to separate
+<br>**into:** Vector of names for the column to be separated into
+<br>**sep:** The value to separate the column at
+<br>1. *Separate Column into Two Columns*
+<br>2. *Separate Column into More Than Two Columns*
+
+```{r seperte1}
+# 1: Separate Column into Two Columns
+#create data frame
+df <- data.frame(player=c('A', 'A', 'B', 'B', 'C', 'C'),
+                 year=c(1, 2, 1, 2, 1, 2),
+                 stats=c('22-2', '29-3', '18-6', '11-8', '12-5', '19-2'))
+
+#view data frame
+df
+
+#separate stats column into points and assists columns
+separate(df, col=stats, into=c('points', 'assists'), sep='-')
+
+# 2: Separate Column into More Than Two Columns
+#create data frame
+df2 <- data.frame(player=c('A', 'A', 'B', 'B', 'C', 'C'),
+                 year=c(1, 2, 1, 2, 1, 2),
+                 stats=c('22/2/3', '29/3/4', '18/6/7', '11/1/2', '12/1/1', '19/2/4'))
+
+#view data frame
+df2
+# separate stats column into three new columns
+separate(df2, col=stats, into=c('points', 'assists', 'steals'), sep='/')
+```
+
+
+## Unite Function 
+<br>The unite() function from the tidyr package can be used to unite multiple data frame columns into a single column.
+<br>**unite(data, col, into, sep)**
+<br>where, **data:** Name of the data frame
+<br>**col:** Name of the new united column
+<br>**… :** Vector of names for the columns to unite
+<br>**sep:** How to join the data in the new united column
+<br>1. *Unite Two Columns into One Column*
+<br>2. *Unite More Than Two Columns*
+
+```{r unit1}
+#  1: Unite Two Columns into One Column
+#create data frame
+df <- data.frame(player=c('A', 'A', 'B', 'B', 'C', 'C'),
+                 year=c(1, 2, 1, 2, 1, 2),
+                 points=c(22, 29, 18, 11, 12, 19),
+                 assists=c(2, 3, 6, 8, 5, 2))
+
+#view data frame
+df
+
+#unite points and assists columns into single column
+unite(df, col='points-assists', c('points', 'assists'), sep='-')
+
+# 2: Unite More Than Two Columns
+#create data frame
+df2 <- data.frame(player=c('A', 'A', 'B', 'B', 'C', 'C'),
+                  year=c(1, 2, 1, 2, 1, 2),
+                  points=c(22, 29, 18, 11, 12, 19),
+                  assists=c(2, 3, 6, 8, 5, 2),
+                  blocks=c(2, 3, 3, 2, 1, 0))
+
+#view data frame
+df2
+
+#unite points, assists, and blocks column into single column
+unite(df2, col='stats', c('points', 'assists', 'blocks'), sep='/')
+```
+
+https://www.statology.org/in-operator-in-r/
